@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Agenda Fácil - Apresentação Comercial & Painel ADM / CRM</title>
+  <meta name="description" content="Plataforma de automação de agendamentos pelo WhatsApp com sinal Pix integrado, apresentação comercial interativa e CRM Kanban completo.">
+
+  <!-- Open Graph / WhatsApp Preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Agenda Fácil - Apresentação Comercial & Painel ADM / CRM">
+  <meta property="og:description" content="Elimine até 85% das faltas e automatize agendamentos 24 horas por dia com sinal Pix pelo WhatsApp.">
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#faf5ff',
+              100: '#f3e8ff',
+              200: '#e9d5ff',
+              300: '#d8b4fe',
+              400: '#c084fc',
+              500: '#a855f7',
+              600: '#9333ea',
+              700: '#7c3aed',
+              800: '#6d28d9',
+              900: '#581c87',
+              950: '#2e1065',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            heading: ['Space Grotesk', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg-dark: #0b0714;
+      --bg-surface: #140d27;
+      --bg-card: rgba(28, 16, 52, 0.75);
+      --purple-primary: #7c3aed;
+      --purple-glow: rgba(168, 85, 247, 0.45);
+      --emerald: #10b981;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    .font-heading {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* Ambient glowing background */
+    .ambient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+      animation: floatSlow 20s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, #7c3aed 0%, #3b0764 70%);
+      top: -120px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, #9333ea 0%, #1e1b4b 70%);
+      bottom: -150px;
+      right: -120px;
+      animation-duration: 25s;
+    }
+
+    @keyframes floatSlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* Glass card styling */
+    .glass-panel {
+      background: linear-gradient(145deg, rgba(30, 17, 56, 0.82), rgba(16, 8, 32, 0.94));
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .glass-card-hover:hover {
+      border-color: rgba(192, 132, 252, 0.5);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.22);
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(11, 7, 20, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(168, 85, 247, 0.4);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(168, 85, 247, 0.7);
+    }
+
+    /* Dragging effects */
+    .kanban-card.dragging {
+      opacity: 0.45;
+      transform: scale(0.97);
+    }
+    .kanban-col.drag-over {
+      background: rgba(46, 21, 91, 0.5) !important;
+      border-color: #c084fc !important;
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.35) inset;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col">
+
+  <!-- Ambient Light Orbs -->
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-16 right-4 sm:right-6 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="fixed top-0 left-0 w-full h-[68px] px-4 sm:px-8 flex items-center justify-between z-40 bg-[#0b0714]/90 backdrop-blur-xl border-b border-purple-500/20">
+    <!-- Brand Logo -->
+    <div onclick="switchView('deck'); goToSlide(0);" class="flex items-center gap-2.5 cursor-pointer group" role="button" aria-label="Ir para a apresentação">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-purple-500 to-fuchsia-400 flex items-center justify-center text-white shadow-[0_0_20px_rgba(168,85,247,0.4)] group-hover:scale-105 transition-transform duration-300">
+        <i class="fa-solid fa-calendar-check text-base"></i>
+      </div>
+      <div>
+        <span class="font-heading text-lg sm:text-xl font-bold bg-gradient-to-r from-white via-purple-100 to-purple-300 bg-clip-text text-transparent tracking-tight">
+          Agenda Fácil
+        </span>
+        <span class="hidden md:inline-block ml-2 text-[10px] font-semibold uppercase tracking-wider text-purple-400 bg-purple-950/80 border border-purple-500/30 px-1.5 py-0.5 rounded">
+          Automação WhatsApp
+        </span>
+      </div>
+    </div>
+
+    <!-- Mode Switcher Tabs (Strictly 2 Areas: Apresentação e Painel ADM) -->
+    <div class="flex bg-white/5 border border-purple-500/20 p-1 rounded-xl gap-1">
+      <button id="tabDeckBtn" onclick="switchView('deck')" class="flex items-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-[0_2px_14px_rgba(168,85,247,0.4)] cursor-pointer">
+        <i class="fa-solid fa-desktop text-xs"></i>
+        <span>Apresentação</span>
+      </button>
+
+      <button id="tabCrmBtn" onclick="requestCrmAccess()" class="flex items-center gap-2 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 cursor-pointer">
+        <i class="fa-solid fa-chart-pie text-xs"></i>
+        <span>Painel ADM</span>
+        <span id="crmHeaderBadge" class="bg-emerald-500 text-[#0b0714] text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">
+          11
+        </span>
+        <i id="crmLockIcon" class="fa-solid fa-lock text-xs text-slate-400"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       ÁREA 1: APRESENTAÇÃO COMERCIAL (6 SLIDES COM CTA - FORMATO QUADRADO)
+       ========================================================================= -->
+  <section id="viewDeck" class="relative z-10 w-full min-h-[calc(100vh-68px)] pt-[68px] flex flex-col justify-between">
+    <!-- Progress Bar -->
+    <div class="fixed top-[68px] left-0 w-full h-[3px] bg-white/5 z-30">
+      <div id="deckProgressBar" class="h-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-purple-300 transition-all duration-500 ease-out shadow-[0_0_12px_rgba(168,85,247,0.8)] w-[16.66%]"></div>
+    </div>
+
+    <!-- Slides Viewport (Centralizado e Formato Quadrado Elegante) -->
+    <main class="w-full flex-1 flex items-center justify-center px-3 sm:px-6 py-4 pb-20">
+      <!-- O Slide Quadrado (Adaptado para Notebook e Celular) -->
+      <div class="w-full max-w-[620px] md:max-w-[650px] aspect-auto sm:aspect-square min-h-[480px] sm:min-h-[520px] max-h-[calc(100dvh-155px)] glass-panel rounded-3xl border border-purple-500/35 p-5 sm:p-7 flex flex-col justify-between shadow-[0_0_60px_rgba(124,58,237,0.3)] mx-auto relative overflow-y-auto">
+
+        <!-- SLIDE 1: CAPA & MÉTRICAS (QUADRADO) -->
+        <article id="slide-0" class="slide-item flex flex-col justify-between h-full space-y-4 sm:space-y-6 py-2">
+          <div class="space-y-3 sm:space-y-4">
+            <div class="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-wand-magic-sparkles text-yellow-300"></i>
+              <span>Plataforma Inteligente de Agendamento</span>
+            </div>
+
+            <h1 class="font-heading text-2xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight text-white">
+              Revolucione sua agenda com o <span class="bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent underline decoration-purple-500/50">Agenda Fácil</span>
+            </h1>
+
+            <p class="text-xs sm:text-base text-slate-300 font-light leading-relaxed">
+              Elimine faltas de última hora, automatize marcações 24 horas por dia direto pelo WhatsApp e receba pagamentos de sinal via Pix antes de cada atendimento.
+            </p>
+          </div>
+
+          <!-- 3 Impact Metrics -->
+          <div class="grid grid-cols-3 gap-2.5 sm:gap-3.5 pt-2">
+            <div class="bg-white/5 border border-purple-500/20 rounded-2xl p-3 sm:p-4 text-center">
+              <span class="font-heading text-xl sm:text-3xl font-extrabold text-emerald-400 block">+45%</span>
+              <span class="text-[10px] sm:text-xs text-slate-400 leading-tight block mt-1">Mais agendamentos</span>
+            </div>
+            <div class="bg-white/5 border border-purple-500/20 rounded-2xl p-3 sm:p-4 text-center">
+              <span class="font-heading text-xl sm:text-3xl font-extrabold text-purple-300 block">-85%</span>
+              <span class="text-[10px] sm:text-xs text-slate-400 leading-tight block mt-1">Redução de faltas</span>
+            </div>
+            <div class="bg-white/5 border border-purple-500/20 rounded-2xl p-3 sm:p-4 text-center">
+              <span class="font-heading text-xl sm:text-3xl font-extrabold text-sky-400 block">24/7</span>
+              <span class="text-[10px] sm:text-xs text-slate-400 leading-tight block mt-1">Autoatendimento</span>
+            </div>
+          </div>
+
+          <!-- Vantagens Automáticas do Sistema (Texto Curto e Direto) -->
+          <div class="bg-gradient-to-r from-purple-900/30 via-purple-950/40 to-indigo-950/30 border border-purple-500/30 rounded-2xl p-3.5 sm:p-4 shadow-lg">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Vantagens Automáticas do Sistema</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              Atendimento 100% automático no WhatsApp 24 horas por dia, confirmação em tempo real com sinal Pix direto na sua conta e sincronização instantânea na nuvem sem precisar manter o celular conectado.
+            </p>
+          </div>
+
+          <div class="text-center pt-1 text-[11px] text-purple-300/80 font-medium">
+            <span>Navegue usando os botões abaixo ou as setas do teclado</span>
+          </div>
+        </article>
+
+      <!-- SLIDE 2: DIAGNÓSTICO DE MERCADO & DORES DA AGENDA MANUAL -->
+      <article id="slide-1" class="slide-item hidden space-y-5 py-2">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-rose-500/15 border border-rose-500/30 text-rose-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            Diagnóstico de Mercado
+          </div>
+          <h2 class="font-heading text-2xl sm:text-4xl font-extrabold text-white">
+            Quanto tempo e dinheiro você perde com a <span class="text-rose-400">agenda manual</span>?
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            O método arcaico de responder clientes um a um gera frustração, horários vagos de última hora e perda de faturamento.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div class="glass-panel rounded-2xl p-4 sm:p-5">
+            <div class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-3">
+              <i class="fa-solid fa-clock text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Perda de Tempo no WhatsApp</h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Média de 15 minutos em conversas arrastadas apenas para marcar um horário. Se você demora para responder, o cliente procura outro local.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5">
+            <div class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-3">
+              <i class="fa-solid fa-user-xmark text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Faltas & No-Show Constantes</h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Taxas de faltas que chegam a 25%. Quando o cliente não avisa e simplesmente não aparece, você fica com a sala ociosa e prejuízo na conta.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5">
+            <div class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-3">
+              <i class="fa-solid fa-hand-holding-dollar text-base"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Insegurança Financeira</h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Sem o pagamento de um sinal antecipado, você assume 100% do risco de desistência, reservando equipe, agenda e insumos sem garantia.
+            </p>
+          </div>
+        </div>
+
+        <!-- Informação Complementar Útil: Impacto Real da Automação -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-purple-500/30 shadow-xl space-y-3">
+          <div class="flex items-center gap-2 pb-2 border-b border-purple-500/20">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <i class="fa-solid fa-chart-line text-xs"></i>
+            </div>
+            <div>
+              <h4 class="font-heading font-bold text-sm sm:text-base text-white">Impacto Real no Seu Negócio</h4>
+              <p class="text-[11px] sm:text-xs text-slate-400">O que muda ao migrar da agenda manual para o sistema inteligente:</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="bg-white/5 border border-purple-500/20 rounded-xl p-3">
+              <span class="text-emerald-400 font-bold text-xs uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-clock-rotate-left"></i> 68% Fora do Horário
+              </span>
+              <p class="text-xs text-slate-300 leading-snug">
+                Mais da metade dos clientes tentam marcar horários à noite ou nos fins de semana, quando você não pode atender.
+              </p>
+            </div>
+
+            <div class="bg-white/5 border border-purple-500/20 rounded-xl p-3">
+              <span class="text-purple-300 font-bold text-xs uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt"></i> Resposta Instantânea
+              </span>
+              <p class="text-xs text-slate-300 leading-snug">
+                Clientes concluem agendamentos em menos de 40 segundos, evitando que procurem outro profissional concorrente.
+              </p>
+            </div>
+
+            <div class="bg-white/5 border border-purple-500/20 rounded-xl p-3">
+              <span class="text-sky-400 font-bold text-xs uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+                <i class="fa-solid fa-shield-halved"></i> Comparecimento Real
+              </span>
+              <p class="text-xs text-slate-300 leading-snug">
+                A taxa de presença sobe para mais de 95% com o sinal antecipado e lembretes automáticos enviados no WhatsApp.
+              </p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SLIDE 3: QUADRO COMPARATIVO DETALHADO -->
+      <article id="slide-2" class="slide-item hidden space-y-5 py-2">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            Comparativo Real
+          </div>
+          <h2 class="font-heading text-2xl sm:text-4xl font-extrabold text-white">
+            Método Tradicional vs. <span class="text-purple-300">Agenda Fácil</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Compare o impacto diário na rotina da sua equipe e no faturamento do seu negócio.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <!-- Traditional Side -->
+          <div class="bg-[#170a24]/80 border border-rose-500/30 rounded-2xl p-5 sm:p-6 backdrop-blur-md space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-rose-500/20">
+              <h3 class="font-heading font-bold text-base sm:text-lg text-rose-400 flex items-center gap-2">
+                <i class="fa-solid fa-circle-xmark text-rose-400"></i>
+                Método Tradicional (Lento & Manual)
+              </h3>
+              <span class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold">Alto Custo</span>
+            </div>
+
+            <ul class="space-y-3 text-xs sm:text-sm text-slate-300">
+              <li class="flex items-start gap-2.5">
+                <span class="text-rose-400 font-bold shrink-0">✕</span>
+                <span>Atendimento restrito ao horário comercial: perde quem tenta agendar à noite ou no final de semana.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-rose-400 font-bold shrink-0">✕</span>
+                <span>Média de 10 a 20 minutos trocando mensagens para fechar um único horário.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-rose-400 font-bold shrink-0">✕</span>
+                <span>Dificuldade e lentidão para gerenciar a grade de horários, reagendar clientes e checar vagas livres.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-rose-400 font-bold shrink-0">✕</span>
+                <span>Sem exigência de sinal antecipado: alta taxa de faltas sem nenhum compromisso do cliente.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-rose-400 font-bold shrink-0">✕</span>
+                <span>Risco diário de duplo agendamento no mesmo horário por erro humano em cadernos ou planilhas.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Agenda Fácil Side -->
+          <div class="bg-gradient-to-br from-[#271142] to-[#120724] border-2 border-purple-500 rounded-2xl p-5 sm:p-6 shadow-[0_0_35px_rgba(168,85,247,0.25)] space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-purple-500/30">
+              <h3 class="font-heading font-bold text-base sm:text-lg text-white flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                Com o Agenda Fácil
+              </h3>
+              <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">100% Automatizado</span>
+            </div>
+
+            <ul class="space-y-3 text-xs sm:text-sm text-slate-200">
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-emerald-400 text-xs shrink-0 mt-1"></i>
+                <span>Autoatendimento 24 horas por dia, 7 dias por semana, sem necessitar de atendente acordado.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-emerald-400 text-xs shrink-0 mt-1"></i>
+                <span>Cliente agenda em menos de 45 segundos direto pelo link no WhatsApp ou bio do Instagram.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-emerald-400 text-xs shrink-0 mt-1"></i>
+                <span>Agilidade na gestão dos horários: painel de controle intuitivo para gerenciar horários, clientes e atendimentos em segundos.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-emerald-400 text-xs shrink-0 mt-1"></i>
+                <span>Pix de sinal integrado: cai diretamente na sua chave bancária no ato da reserva.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <i class="fa-solid fa-check text-emerald-400 text-xs shrink-0 mt-1"></i>
+                <span>Sincronização em dois sentidos com o Google Agenda no celular da sua equipe.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <!-- SLIDE 4: OS 3 PASSOS SIMPLES DE AGENDAMENTO -->
+      <article id="slide-3" class="slide-item hidden space-y-6 py-2">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            Fluxo do Cliente
+          </div>
+          <h2 class="font-heading text-2xl sm:text-4xl font-extrabold text-white">
+            Agendamento em <span class="text-purple-300">3 Passos Simples</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            Uma experiência fluida que não exige download de app nem cadastros demorados.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div class="glass-panel rounded-2xl p-5 relative group hover:border-purple-400 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/50 flex items-center justify-center font-heading font-black text-lg text-purple-300 mb-4">
+              1
+            </div>
+            <h3 class="font-heading font-bold text-base text-white mb-2">1. Seleção de Serviço</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              O cliente acessa o link na bio do Instagram ou clica no link enviado pelo whatsapp. Visualiza o catálogo de serviços, fotos, duração e valores claros.
+            </p>
+            <div class="mt-4 p-2.5 bg-black/30 rounded-xl text-[11px] text-purple-200">
+              ✨ Sem necessidade de baixar nenhum aplicativo.
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-5 relative group hover:border-purple-400 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/50 flex items-center justify-center font-heading font-black text-lg text-purple-300 mb-4">
+              2
+            </div>
+            <h3 class="font-heading font-bold text-base text-white mb-2">2. Escolha de Data & Sinal Pix</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              O sistema checa a disponibilidade em tempo real. O cliente escolhe a data e horário ideal e garante a vaga pagando o sinal via Pix.
+            </p>
+            <div class="mt-4 p-2.5 bg-black/30 rounded-xl text-[11px] text-purple-200">
+              🔒 PIX copia e cola para facilitar.
+            </div>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-5 relative group hover:border-purple-400 transition-all">
+            <div class="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400/50 flex items-center justify-center font-heading font-black text-lg text-purple-300 mb-4">
+              3
+            </div>
+            <h3 class="font-heading font-bold text-base text-white mb-2">3. Confirmação Instantânea</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Recibo automático enviado no WhatsApp com detalhes do agendamento e sincronização imediata no calendário do profissional.
+            </p>
+            <div class="mt-4 p-2.5 bg-black/30 rounded-xl text-[11px] text-emerald-300">
+              🔔 Sincronização automática na nuvem e bloqueio instantâneo do horário.
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- SLIDE 5: GRADE COM OS RECURSOS EXCLUSIVOS -->
+      <article id="slide-4" class="slide-item hidden space-y-5 py-2">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            Tecnologia Completa
+          </div>
+          <h2 class="font-heading text-2xl sm:text-4xl font-extrabold text-white">
+            Recursos Exclusivos da Plataforma <span class="text-purple-300">Agenda Fácil</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Cada módulo foi desenvolvido para maximizar sua lucratividade e economizar horas de trabalho.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3">
+              <i class="fa-brands fa-whatsapp text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">WhatsApp Automático Oficial</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              O sistema envia uma mensagem automática de confirmação com todas as informações necessárias do agendamento: serviços escolhidos, horário e data.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
+              <i class="fa-solid fa-qrcode text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Controle Financeiro & Pix</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Cobrança com Pix automático direto na sua conta. Se você não trabalhar com sinal, basta remover o valor que não vai aparecer cobrando sinal.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-3">
+              <i class="fa-solid fa-calendar-days text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Google Calendar Integrado</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Sincronização em dois sentidos: qualquer compromisso pessoal adicionado na agenda bloqueia o horário no sistema automaticamente.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 mb-3">
+              <i class="fa-solid fa-shield-halved text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Segurança & Confiabilidade</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Plataforma 100% segura com criptografia de ponta a ponta, backups em nuvem automáticos e proteção total para sua base de clientes.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-3">
+              <i class="fa-solid fa-ban text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Bloqueios de Horários Inteligentes</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Trave feriados, pausas para almoço, atestados ou horários de emergência com apenas 1 toque no painel.
+            </p>
+          </div>
+
+          <div class="glass-panel rounded-2xl p-4 sm:p-5 hover:border-purple-400 transition-all">
+            <div class="w-9 h-9 rounded-xl bg-fuchsia-500/15 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-300 mb-3">
+              <i class="fa-solid fa-link text-lg"></i>
+            </div>
+            <h3 class="font-heading font-bold text-sm sm:text-base text-white">Link na Bio & Autoatendimento</h3>
+            <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              Link personalizado para colocar na sua bio do Instagram, cartões de visita digitais e campanhas patrocinadas.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- SLIDE 6: TELA DE FECHAMENTO / CTA & PLANO VITALÍCIO -->
+      <article id="slide-5" class="slide-item hidden space-y-6 py-2 max-w-3xl mx-auto">
+        <div class="text-center">
+          <div class="inline-flex items-center gap-2 bg-purple-500/15 border border-purple-500/30 text-purple-300 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+            Condição Especial Exclusiva
+          </div>
+          <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-white">
+            Transforme sua agenda com o <span class="text-purple-300">Agenda Fácil</span>
+          </h2>
+        </div>
+
+        <!-- OFERTA ESPECIAL VITALÍCIA CENTRALIZADA E LIMPA -->
+        <div class="bg-gradient-to-r from-[#2c0e4f] via-[#1a0833] to-[#0d051c] border-2 border-emerald-400 rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(16,185,129,0.35)] relative overflow-hidden text-center max-w-xl mx-auto">
+          <div class="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-[11px] uppercase px-4 py-1.5 rounded-bl-2xl shadow-md">
+            ⭐ OFERTA ESPECIAL • VITALÍCIO
+          </div>
+
+          <div class="inline-flex items-center gap-2 mb-3">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/15 px-3 py-1 rounded-full border border-emerald-500/30">
+              Acesso Vitalício
+            </span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-purple-300 bg-purple-500/15 px-3 py-1 rounded-full border border-purple-500/30">
+              Pagamento Único
+            </span>
+          </div>
+
+          <h3 class="font-heading font-black text-xl sm:text-2xl text-white mb-5">
+            Agenda Fácil Vitalício
+          </h3>
+
+          <!-- 3 Vantagens Solicitadas -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-6 text-left">
+            <div class="flex items-center gap-2 text-xs text-emerald-200 bg-white/5 p-3 rounded-xl border border-white/5">
+              <i class="fa-solid fa-circle-check text-emerald-400 text-base shrink-0"></i>
+              <span class="font-semibold">Não paga mensalidade</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-emerald-200 bg-white/5 p-3 rounded-xl border border-white/5">
+              <i class="fa-solid fa-circle-check text-emerald-400 text-base shrink-0"></i>
+              <span class="font-semibold">Não paga manutenção</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-emerald-200 bg-white/5 p-3 rounded-xl border border-white/5">
+              <i class="fa-solid fa-circle-check text-emerald-400 text-base shrink-0"></i>
+              <span class="font-semibold">Acesso total ao Agenda Fácil</span>
+            </div>
+          </div>
+
+          <!-- Preço: De R$ 199 por R$ 99 único -->
+          <div class="bg-black/35 border border-emerald-500/30 rounded-2xl p-4 mb-6">
+            <div class="text-xs sm:text-sm text-slate-400 font-semibold line-through">De R$ 199,00</div>
+            <div class="flex items-baseline justify-center gap-2 my-1">
+              <span class="text-base text-slate-300 font-bold">por</span>
+              <span class="font-heading text-4xl sm:text-5xl font-black text-emerald-400">R$ 99</span>
+              <span class="text-xs sm:text-sm text-slate-300 font-bold uppercase tracking-wide">único</span>
+            </div>
+            <div class="text-xs text-emerald-300 font-semibold mt-1">
+              De R$ 199 por R$ 99 único
+            </div>
+          </div>
+
+          <!-- Dois Novos Botões Principais de Ação -->
+          <div class="flex flex-col sm:flex-row gap-3 items-stretch justify-center pt-1">
+            <button onclick="openDemoModal('vitalicio', 'contratar')" class="flex-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black py-3.5 px-4 rounded-xl text-xs sm:text-sm shadow-[0_0_25px_rgba(16,185,129,0.5)] cursor-pointer transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt"></i>
+              <span>Quero Contratar o Agenda Fácil</span>
+            </button>
+            <button onclick="openDemoModal('vitalicio', 'demonstracao')" class="flex-1 bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/50 hover:border-purple-300 text-white font-bold py-3.5 px-4 rounded-xl text-xs sm:text-sm shadow-[0_0_20px_rgba(168,85,247,0.3)] cursor-pointer transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-headset text-purple-300"></i>
+              <span>Agendar Demonstração Ao Vivo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Selos de Garantia Obrigatórios -->
+        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-1 text-xs text-purple-200">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <strong>14 dias grátis</strong> para testar sem compromisso
+          </span>
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <strong>Sem fidelidade</strong> ou taxas ocultas
+          </span>
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-400"></i>
+            <strong>Implantação assistida</strong> inclusa
+          </span>
+        </div>
+      </article>
+
+      </div>
+    </main>
+
+    <!-- FOOTER DE NAVEGAÇÃO DOS SLIDES -->
+    <footer class="fixed bottom-0 left-0 w-full h-[60px] px-4 sm:px-8 flex items-center justify-between z-30 bg-[#0b0714]/90 backdrop-blur-xl border-t border-purple-500/20">
+      <button id="btnPrevSlide" onclick="prevSlide()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all opacity-30 border-white/5 text-slate-500 cursor-not-allowed" disabled>
+        <i class="fa-solid fa-arrow-left text-xs"></i>
+        <span>Anterior</span>
+      </button>
+
+      <!-- Dots Indicators & Slide Badge Counter -->
+      <div class="flex items-center gap-2">
+        <div id="deckDots" class="flex items-center gap-1.5 sm:gap-2"></div>
+        <span id="slideBadge" class="hidden sm:inline-block text-[11px] font-mono font-bold text-purple-300 bg-purple-950/80 px-2 py-0.5 rounded-md border border-purple-500/30 whitespace-nowrap">
+          Slide 01 / 06
+        </span>
+      </div>
+
+      <button id="btnNextSlide" onclick="nextSlide()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white border-purple-500 cursor-pointer shadow-md">
+        <span>Próximo</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+      </button>
+    </footer>
+  </section>
+
+  <!-- =========================================================================
+       ÁREA 2: PAINEL ADM / CRM PROFISSIONAL E COMPLETO
+       ========================================================================= -->
+  <section id="viewCrm" class="hidden relative z-10 w-full min-h-[calc(100vh-68px)] pt-[68px] flex-col">
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex-1 flex flex-col">
+      <!-- Title & CRM Actions -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-heading text-xl sm:text-2xl font-black text-white">
+              Painel ADM / Gestão de Contratos & CRM
+            </h1>
+            <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full border border-purple-500/30">
+              Ao Vivo
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Monitore receita recorrente (MRR), funil comercial e adimplência das empresas clientes
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="exportCrmCsv()" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition-colors cursor-pointer" title="Exportar dados em formato CSV">
+            <i class="fa-solid fa-download text-xs"></i>
+            <span class="hidden sm:inline">Exportar CSV</span>
+          </button>
+
+          <button onclick="resetDefaultData()" class="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors cursor-pointer" title="Restaurar dados de demonstração">
+            <i class="fa-solid fa-rotate-left text-xs"></i>
+            <span class="hidden sm:inline">Restaurar</span>
+          </button>
+
+          <button onclick="openLeadModal('novo')" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.35)] transition-all cursor-pointer">
+            <i class="fa-solid fa-plus text-xs"></i>
+            <span>Novo Cliente</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de KPIs no Topo -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5">
+        <!-- MRR -->
+        <div class="bg-gradient-to-br from-[#3b1569] via-[#210c3f] to-[#140626] border-2 border-purple-400/50 rounded-2xl p-4 shadow-[0_0_30px_rgba(168,85,247,0.25)] flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-200 block">Faturamento Mensal (MRR)</span>
+            <span id="kpiMrr" class="font-heading text-xl sm:text-2xl font-black text-white block mt-0.5">R$ 0,00</span>
+            <span id="kpiClosedSubtitle" class="text-[10px] text-purple-300 block mt-1">0 clientes ativos</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-purple-500/25 border border-purple-400/40 flex items-center justify-center text-purple-200">
+            <i class="fa-solid fa-dollar-sign text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Total Leads -->
+        <div class="glass-panel rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total de Clientes / Leads</span>
+            <span id="kpiTotalLeads" class="font-heading text-xl sm:text-2xl font-black text-white block mt-0.5">0</span>
+            <span id="kpiPipelineVal" class="text-[10px] text-slate-400 block mt-1">Pipeline: R$ 0,00</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <i class="fa-solid fa-users text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Taxa de Conversão -->
+        <div class="glass-panel rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Taxa de Conversão</span>
+            <span id="kpiConversion" class="font-heading text-xl sm:text-2xl font-black text-emerald-400 block mt-0.5">0%</span>
+            <span id="kpiConversionSubtitle" class="text-[10px] text-slate-400 block mt-1">0 de 0 convertidos</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid fa-bullseye text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Adimplência -->
+        <div class="glass-panel rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Pagamentos em Dia</span>
+            <span id="kpiPaidRate" class="font-heading text-xl sm:text-2xl font-black text-white block mt-0.5">0%</span>
+            <span id="kpiPaidSubtitle" class="text-[10px] text-slate-400 block mt-1">100% adimplente</span>
+          </div>
+          <div class="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-300">
+            <i class="fa-solid fa-circle-check text-lg"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Ferramentas / Busca & Filtro -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 bg-white/5 border border-purple-500/20 p-2.5 rounded-2xl backdrop-blur-md">
+        <div class="relative flex-1 w-full sm:w-auto">
+          <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="crmSearchInput" placeholder="Buscar por nome, segmento ou WhatsApp..." oninput="renderCrmBoard()" class="w-full bg-[#120822] border border-purple-500/20 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400">
+        </div>
+
+        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          <span class="text-[11px] font-semibold text-slate-400 shrink-0">Pagamento:</span>
+          <select id="crmPaymentFilter" onchange="renderCrmBoard()" class="flex-1 sm:flex-none bg-[#120822] border border-purple-500/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-400">
+            <option value="todos">Todos</option>
+            <option value="pago">Pagos</option>
+            <option value="pendente">Pendentes</option>
+            <option value="atrasado">Atrasados</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quadro Kanban Profissional (4 Colunas Dinâmicas) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 flex-1 items-start min-h-[460px] pb-8">
+        <!-- Coluna 1: Novo Lead -->
+        <div id="col-novo" class="kanban-col flex flex-col bg-[#130b26]/75 border border-purple-500/20 rounded-2xl min-h-[460px] max-h-[78vh] backdrop-blur-xl transition-all" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'novo')">
+          <div class="p-3.5 border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8]"></span>
+              <h3 class="font-heading font-bold text-xs sm:text-sm text-white">Novo Lead</h3>
+              <span id="badge-novo" class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300">0</span>
+            </div>
+            <button onclick="openLeadModal('novo')" class="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Adicionar lead nesta etapa">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div class="px-3.5 py-1.5 bg-black/20 text-[11px] text-slate-400 flex items-center justify-between border-b border-white/5">
+            <span>Subtotal:</span>
+            <span id="subtotal-novo" class="font-heading font-semibold text-purple-300">R$ 0,00</span>
+          </div>
+          <div id="cards-novo" class="p-2.5 flex-1 overflow-y-auto space-y-2.5"></div>
+        </div>
+
+        <!-- Coluna 2: Em Atendimento -->
+        <div id="col-atendimento" class="kanban-col flex flex-col bg-[#130b26]/75 border border-purple-500/20 rounded-2xl min-h-[460px] max-h-[78vh] backdrop-blur-xl transition-all" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'atendimento')">
+          <div class="p-3.5 border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
+              <h3 class="font-heading font-bold text-xs sm:text-sm text-white">Em Atendimento</h3>
+              <span id="badge-atendimento" class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300">0</span>
+            </div>
+            <button onclick="openLeadModal('atendimento')" class="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Adicionar lead nesta etapa">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div class="px-3.5 py-1.5 bg-black/20 text-[11px] text-slate-400 flex items-center justify-between border-b border-white/5">
+            <span>Subtotal:</span>
+            <span id="subtotal-atendimento" class="font-heading font-semibold text-purple-300">R$ 0,00</span>
+          </div>
+          <div id="cards-atendimento" class="p-2.5 flex-1 overflow-y-auto space-y-2.5"></div>
+        </div>
+
+        <!-- Coluna 3: Proposta Enviada -->
+        <div id="col-proposta" class="kanban-col flex flex-col bg-[#130b26]/75 border border-purple-500/20 rounded-2xl min-h-[460px] max-h-[78vh] backdrop-blur-xl transition-all" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'proposta')">
+          <div class="p-3.5 border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400 shadow-[0_0_8px_#c084fc]"></span>
+              <h3 class="font-heading font-bold text-xs sm:text-sm text-white">Proposta Enviada</h3>
+              <span id="badge-proposta" class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300">0</span>
+            </div>
+            <button onclick="openLeadModal('proposta')" class="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Adicionar lead nesta etapa">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div class="px-3.5 py-1.5 bg-black/20 text-[11px] text-slate-400 flex items-center justify-between border-b border-white/5">
+            <span>Subtotal:</span>
+            <span id="subtotal-proposta" class="font-heading font-semibold text-purple-300">R$ 0,00</span>
+          </div>
+          <div id="cards-proposta" class="p-2.5 flex-1 overflow-y-auto space-y-2.5"></div>
+        </div>
+
+        <!-- Coluna 4: Fechado / Ganho -->
+        <div id="col-fechado" class="kanban-col flex flex-col bg-[#130b26]/75 border border-purple-500/20 rounded-2xl min-h-[460px] max-h-[78vh] backdrop-blur-xl transition-all" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'fechado')">
+          <div class="p-3.5 border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]"></span>
+              <h3 class="font-heading font-bold text-xs sm:text-sm text-white">Fechado / Ganho</h3>
+              <span id="badge-fechado" class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">0</span>
+            </div>
+            <button onclick="openLeadModal('fechado')" class="w-6 h-6 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer" title="Adicionar lead nesta etapa">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div class="px-3.5 py-1.5 bg-black/20 text-[11px] text-slate-400 flex items-center justify-between border-b border-white/5">
+            <span>Subtotal (MRR):</span>
+            <span id="subtotal-fechado" class="font-heading font-semibold text-emerald-400">R$ 0,00</span>
+          </div>
+          <div id="cards-fechado" class="p-2.5 flex-1 overflow-y-auto space-y-2.5"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       MODAIS DO SISTEMA
+       ========================================================================= -->
+
+  <!-- MODAL DE PIN (ACESSO RESTRITO AO CRM) -->
+  <div id="pinModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="bg-gradient-to-b from-[#1e1038] to-[#0c051a] border border-purple-500/40 w-full max-w-sm rounded-2xl p-6 relative shadow-[0_0_50px_rgba(168,85,247,0.35)] text-center">
+      <button onclick="closePinModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300 mx-auto mb-3 shadow-inner">
+        <i class="fa-solid fa-lock text-xl"></i>
+      </div>
+
+      <h3 class="font-heading text-lg font-bold text-white">Acesso Restrito ao Painel</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-5">Área administrativa com métricas confidenciais e funil de vendas</p>
+
+      <form onsubmit="handlePinSubmit(event)" class="space-y-4">
+        <div>
+          <input type="password" id="pinInput" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" required class="w-40 mx-auto block text-center font-mono text-2xl tracking-[0.5em] bg-white/5 border-2 border-purple-500/40 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 transition-all">
+        </div>
+
+        <div id="pinErrorMsg" class="hidden items-center justify-center gap-1.5 text-xs text-rose-400 font-semibold">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>PIN incorreto! Tente novamente.</span>
+        </div>
+
+        <div class="pt-1">
+          <span class="inline-block text-[11px] text-purple-300/80 bg-purple-950/60 border border-purple-500/20 px-3 py-1 rounded-full">
+            🔑 PIN Padrão: <strong>1987</strong>
+          </span>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-key text-xs"></i>
+          <span>Desbloquear Painel</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CADASTRAR / EDITAR CLIENTE -->
+  <div id="leadModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="bg-gradient-to-b from-[#1d1033] to-[#0c051a] border border-purple-500/40 w-full max-w-lg rounded-2xl p-5 sm:p-6 relative shadow-[0_0_50px_rgba(168,85,247,0.35)] max-h-[90vh] overflow-y-auto">
+      <button onclick="closeLeadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300">
+          <i class="fa-solid fa-user-plus text-xs"></i>
+        </div>
+        <div>
+          <h3 id="leadModalTitle" class="font-heading text-lg font-bold text-white">Cadastrar Novo Cliente</h3>
+          <p class="text-xs text-slate-400">Preencha os dados comerciais da empresa</p>
+        </div>
+      </div>
+
+      <form id="leadForm" onsubmit="handleSaveLead(event)" class="space-y-3.5">
+        <input type="hidden" id="leadEditId">
+
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-1">Nome do Estabelecimento ou Responsável *</label>
+          <input type="text" id="leadName" required placeholder="Ex: Barbearia Dom Lucas ou Dra. Beatriz" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Segmento / Nicho *</label>
+            <input type="text" id="leadNiche" required placeholder="Ex: Barbearia, Estética, Pilates, Dentista" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">WhatsApp (com DDD) *</label>
+            <input type="text" id="leadPhone" required placeholder="Ex: 11987654321" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Valor da Mensalidade (R$) *</label>
+            <input type="number" id="leadValue" step="0.01" required value="349.00" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Plano Contratado</label>
+            <select id="leadPlan" class="w-full bg-[#170c2a] border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+              <option value="basico">Básico (R$ 199/mês)</option>
+              <option value="pro" selected>Profissional (R$ 349/mês)</option>
+              <option value="enterprise">Enterprise (R$ 699/mês)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Etapa no Funil</label>
+            <select id="leadStage" class="w-full bg-[#170c2a] border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+              <option value="novo">Novo Lead</option>
+              <option value="atendimento">Em Atendimento</option>
+              <option value="proposta">Proposta Enviada</option>
+              <option value="fechado">Fechado / Ganho</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Status do Pagamento</label>
+            <select id="leadPayment" class="w-full bg-[#170c2a] border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+              <option value="pago">Pago (Em dia)</option>
+              <option value="pendente" selected>Pendente</option>
+              <option value="atrasado">Atrasado</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-1">Observações do Cliente</label>
+          <textarea id="leadNotes" rows="2" placeholder="Ex: Utiliza 3 profissionais com sinal de R$ 30 por atendimento." class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeLeadModal()" class="flex-1 bg-white/5 hover:bg-white/10 text-white font-semibold py-2.5 rounded-xl text-xs transition-colors cursor-pointer">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-check text-xs"></i>
+            <span>Salvar Cliente</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHES DO CLIENTE & HISTÓRICO -->
+  <div id="leadDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md hidden">
+    <div class="bg-gradient-to-b from-[#1d1033] to-[#0d061c] border border-purple-500/40 w-full max-w-xl rounded-2xl p-5 sm:p-6 relative shadow-[0_0_50px_rgba(168,85,247,0.35)] max-h-[92vh] overflow-y-auto">
+      <button onclick="closeLeadDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-purple-500/20">
+        <div class="flex items-center gap-3">
+          <div id="detailAvatar" class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md">
+            CL
+          </div>
+          <div>
+            <h3 id="detailName" class="font-heading text-lg sm:text-xl font-bold text-white">Nome do Cliente</h3>
+            <span id="detailNichePlan" class="text-xs text-purple-300 font-semibold block">Nicho • Plano</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 mr-6">
+          <button onclick="editCurrentLead()" class="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer" title="Editar">
+            <i class="fa-solid fa-pen-to-square text-xs"></i>
+          </button>
+          <button onclick="deleteCurrentLead()" class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer" title="Excluir">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4">
+        <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+          <span class="text-xs text-slate-400 block mb-0.5">WhatsApp:</span>
+          <span id="detailPhone" class="text-xs sm:text-sm font-semibold text-white">11987654321</span>
+        </div>
+        <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+          <span class="text-xs text-slate-400 block mb-0.5">Mensalidade:</span>
+          <span id="detailValue" class="text-xs sm:text-sm font-bold text-emerald-400 font-heading">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- Quick WhatsApp Button -->
+      <a id="detailWhatsAppLink" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md mb-4 transition-colors">
+        <i class="fa-brands fa-whatsapp text-sm"></i>
+        <span>Iniciar Conversa no WhatsApp do Cliente</span>
+      </a>
+
+      <!-- Notes / History -->
+      <div class="space-y-3">
+        <h4 class="font-heading font-bold text-xs uppercase tracking-wider text-purple-300">Histórico & Anotações</h4>
+        <div id="detailNotesBox" class="bg-purple-950/40 border border-purple-500/20 rounded-xl p-3 text-xs text-purple-200">
+          Nenhuma anotação cadastrada.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SIMULADOR DE AGENDAMENTO AO VIVO -->
+  <div id="bookingSimulatorModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md hidden">
+    <div class="bg-gradient-to-b from-[#1c1033] to-[#0c051a] border border-purple-500/40 w-full max-w-xl rounded-2xl p-5 sm:p-6 relative shadow-[0_0_50px_rgba(168,85,247,0.3)] max-h-[90vh] overflow-y-auto">
+      <button onclick="closeBookingSimulatorModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-purple-500/20">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md">
+          <i class="fa-brands fa-whatsapp text-base"></i>
+        </div>
+        <div>
+          <h3 class="font-heading text-lg font-bold text-white">Simulador de Agendamento 24h</h3>
+          <p class="text-xs text-slate-400">Experimente exatamente o que o cliente final vivencia pelo WhatsApp</p>
+        </div>
+      </div>
+
+      <!-- Step 1: Selecionar Serviço -->
+      <div id="simStep-1" class="space-y-4">
+        <p class="text-xs font-semibold text-purple-300">1. Selecione o serviço desejado:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div onclick="selectSimService('Consulta Estética Facial VIP', 180, 50)" class="sim-service-item p-3.5 rounded-xl border border-purple-400 bg-purple-600/25 cursor-pointer">
+            <div class="flex justify-between items-start">
+              <h4 class="font-semibold text-xs sm:text-sm text-white">Consulta Estética VIP</h4>
+              <span class="font-heading font-bold text-xs text-purple-300">R$ 180</span>
+            </div>
+            <span class="text-[11px] text-slate-400 block mt-1">Duração: 50 min • Sinal: R$ 50</span>
+          </div>
+
+          <div onclick="selectSimService('Corte Executivo & Barba', 95, 30)" class="sim-service-item p-3.5 rounded-xl border border-white/10 bg-white/5 hover:border-purple-500/40 cursor-pointer">
+            <div class="flex justify-between items-start">
+              <h4 class="font-semibold text-xs sm:text-sm text-white">Corte Executivo & Barba</h4>
+              <span class="font-heading font-bold text-xs text-purple-300">R$ 95</span>
+            </div>
+            <span class="text-[11px] text-slate-400 block mt-1">Duração: 45 min • Sinal: R$ 30</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Seu Nome (Simulação)</label>
+            <input type="text" id="simClientName" value="Ana Paula Ribeiro" class="w-full bg-white/5 border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">Seu WhatsApp</label>
+            <input type="text" id="simClientPhone" value="11987654321" class="w-full bg-white/5 border border-purple-500/30 rounded-lg px-3 py-2 text-xs text-white">
+          </div>
+        </div>
+
+        <button onclick="goToSimStep(2)" class="w-full mt-3 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+          <span>Avançar para Escolha de Horário</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Step 2: Horário & Data -->
+      <div id="simStep-2" class="hidden space-y-4">
+        <p class="text-xs font-semibold text-purple-300">2. Escolha o horário verificado em tempo real:</p>
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="selectSimTime('09:30', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-purple-400 bg-purple-600 text-white">09:30</button>
+          <button type="button" onclick="selectSimTime('11:00', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300">11:00</button>
+          <button type="button" onclick="selectSimTime('14:30', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300">14:30</button>
+          <button type="button" onclick="selectSimTime('16:00', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300">16:00</button>
+          <button type="button" onclick="selectSimTime('17:30', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300">17:30</button>
+          <button type="button" onclick="selectSimTime('19:00', this)" class="sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300">19:00</button>
+        </div>
+
+        <div class="p-3 bg-purple-950/40 border border-purple-500/20 rounded-xl text-xs text-purple-200">
+          <span id="simSummaryService" class="font-semibold block text-white">Consulta Estética VIP</span>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+            <span>Horário: <strong id="simSummaryTime" class="text-purple-300">09:30</strong></span>
+            <span class="font-bold text-emerald-400">Sinal: R$ 50,00</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="goToSimStep(1)" class="flex-1 bg-white/5 hover:bg-white/10 text-white font-semibold py-2.5 rounded-xl text-xs cursor-pointer">Voltar</button>
+          <button onclick="goToSimStep(3)" class="flex-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm cursor-pointer">Avançar para Sinal Pix</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Sinal Pix & Confirmação -->
+      <div id="simStep-3" class="hidden space-y-4 text-center">
+        <p class="text-xs font-semibold text-purple-300">3. Garanta o horário com o Sinal Pix Antecipado:</p>
+        <div class="bg-[#120a22] border border-purple-500/30 rounded-2xl p-4 flex flex-col items-center">
+          <div class="text-xs text-slate-400 mb-1">Sinal para confirmação da vaga:</div>
+          <div id="simDepositVal" class="font-heading text-2xl font-black text-emerald-400 mb-3">R$ 50,00</div>
+          
+          <div class="w-32 h-32 bg-white p-2 rounded-xl flex items-center justify-center shadow-lg relative mb-3">
+            <div class="w-full h-full border-4 border-dashed border-slate-900 flex flex-col items-center justify-center text-slate-900">
+              <span class="font-heading font-black text-xs">PIX QR CODE</span>
+              <span class="text-[8px] font-bold text-purple-700">AGENDA FÁCIL</span>
+            </div>
+          </div>
+
+          <div class="w-full flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2 text-[11px] text-slate-300">
+            <span class="truncate flex-1 font-mono text-[10px]">00020126580014br.gov.bcb.pix0136agendafacil-sinal-demo</span>
+            <button onclick="copySimPix()" class="bg-purple-600 hover:bg-purple-500 text-white px-2 py-1 rounded text-[10px] font-bold shrink-0 cursor-pointer">Copiar</button>
+          </div>
+        </div>
+
+        <button onclick="finishSimBooking()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Simular Pagamento Confirmado & Ver Notificação WhatsApp</span>
+        </button>
+      </div>
+
+      <!-- Step 4: WhatsApp Message Card Preview -->
+      <div id="simStep-4" class="hidden space-y-4">
+        <div class="text-center">
+          <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 mx-auto mb-2">
+            <i class="fa-solid fa-check text-base"></i>
+          </div>
+          <h4 class="font-heading text-base font-bold text-white">Agendamento Confirmado com Sucesso!</h4>
+          <p class="text-xs text-slate-400">Recibo e lembrete inteligente gerados automaticamente:</p>
+        </div>
+
+        <div class="bg-[#0b141a] border border-[#202c33] rounded-2xl p-4 shadow-xl text-xs space-y-2">
+          <div class="flex items-center gap-2 pb-2 border-b border-[#202c33]">
+            <div class="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center text-white text-[10px] font-bold">AF</div>
+            <span class="text-xs font-bold text-white">Agenda Fácil Bot</span>
+            <span class="text-[10px] text-emerald-400 ml-auto">online</span>
+          </div>
+
+          <div class="bg-[#1f2c34] text-slate-100 rounded-xl p-3 space-y-2 font-sans">
+            <p>Olá, <strong class="text-emerald-300" id="simMsgClient">Ana Paula</strong>! Seu horário está garantido com sinal pago via Pix:</p>
+            <div class="bg-black/30 rounded-lg p-2 font-mono text-[11px] space-y-0.5">
+              <div>✨ <span class="text-slate-400">Serviço:</span> <span id="simMsgService">Consulta Estética VIP</span></div>
+              <div>⏰ <span class="text-slate-400">Horário:</span> Hoje às <span id="simMsgTime">09:30</span></div>
+              <div>💰 <span class="text-slate-400">Sinal Recebido:</span> R$ 50,00</div>
+            </div>
+            <p class="text-[11px] text-slate-300">🔔 Enviaremos um lembrete automático 2 horas antes com a localização!</p>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="goToSimStep(1)" class="flex-1 bg-white/5 hover:bg-white/10 text-white font-semibold py-2.5 rounded-xl text-xs cursor-pointer">Simular Novo</button>
+          <button onclick="closeBookingSimulatorModal()" class="flex-2 bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold py-2.5 rounded-xl text-xs cursor-pointer">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE SOLICITAÇÃO DE DEMONSTRAÇÃO VIP / CONTRATAÇÃO -->
+  <div id="demoModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md hidden">
+    <div class="bg-gradient-to-b from-[#1f1038] to-[#0c051a] border border-purple-500/40 w-full max-w-lg rounded-2xl p-5 sm:p-7 relative shadow-[0_0_60px_rgba(168,85,247,0.35)] max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDemoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-lg bg-purple-600/30 border border-purple-400/40 flex items-center justify-center text-purple-300">
+          <i id="demoModalIcon" class="fa-solid fa-bolt text-xs"></i>
+        </div>
+        <div>
+          <h3 id="demoModalTitle" class="font-heading text-lg font-bold text-white">Contratar o Agenda Fácil</h3>
+          <p id="demoModalSubtitle" class="text-xs text-purple-200/80">Acesso Vitalício por R$ 99 único • Implantação imediata</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleDemoSubmit(event)" class="space-y-3.5 mt-4">
+        <div>
+          <label class="block text-xs font-semibold text-purple-300 mb-1">Nome do Estabelecimento ou Responsável *</label>
+          <input type="text" id="demoName" required placeholder="Ex: Studio Bella Donna ou Dr. Ricardo" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">Segmento / Nicho *</label>
+            <input type="text" id="demoNiche" required placeholder="Ex: Estética, Barbearia, Dentista" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-purple-300 mb-1">WhatsApp com DDD *</label>
+            <input type="text" id="demoPhone" required placeholder="Ex: (11) 98888-7777" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-400">
+          </div>
+        </div>
+
+        <!-- Box do Plano Vitalício (Exibido na Contratação) -->
+        <div id="demoPlanBox">
+          <label class="block text-xs font-semibold text-purple-300 mb-1.5">Plano Selecionado</label>
+          <div class="p-3 rounded-xl border border-emerald-400 bg-emerald-600/20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white block">⭐ Acesso Vitalício</span>
+              <span class="text-[10px] uppercase font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">Sem Mensalidades</span>
+            </div>
+            <span class="font-heading text-base font-black text-emerald-400">R$ 99 único</span>
+          </div>
+        </div>
+
+        <!-- Box de Data e Horário (Exibido na Demonstração Ao Vivo) -->
+        <div id="demoDateTimeBox" class="hidden space-y-2">
+          <label class="block text-xs font-semibold text-purple-300">Escolha a Data e o Horário da Demonstração *</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] text-slate-300 mb-1">Data Desejada</label>
+              <input type="date" id="demoDate" class="w-full bg-white/5 border border-purple-500/30 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-purple-400 [color-scheme:dark]">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-300 mb-1">Horário Desejado</label>
+              <select id="demoTime" class="w-full bg-[#1b0d30] border border-purple-500/30 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-purple-400">
+                <option value="09:00">09:00 - Manhã</option>
+                <option value="10:30" selected>10:30 - Manhã</option>
+                <option value="14:00">14:00 - Tarde</option>
+                <option value="15:30">15:30 - Tarde</option>
+                <option value="17:00">17:00 - Tarde</option>
+                <option value="19:00">19:00 - Noite</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rodapé Limpo: Apenas o Botão "Confirmar e Cadastrar" -->
+        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold py-3 rounded-xl text-sm shadow-[0_0_25px_rgba(168,85,247,0.4)] flex items-center justify-center gap-2 cursor-pointer mt-2">
+          <span>Confirmar e Cadastrar</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       JAVASCRIPT AUTÔNOMO DA APLICAÇÃO (SINGLE FILE)
+       ========================================================================= -->
+  <script>
+    // --- ESTADO INICIAL DOS DADOS ---
+    const STORAGE_KEY_LEADS = 'agendafacil_standalone_leads';
+    const STORAGE_KEY_PIN = 'agendafacil_standalone_pin';
+    const DEFAULT_PIN = "1987";
+
+    const INITIAL_LEADS = [
+      { id: '1', name: 'Dra. Beatriz Santos', niche: 'Estética Avançada', phone: '11987654321', value: 499, stage: 'fechado', payment: 'pago', plan: 'pro', notes: 'Reduziu faltas em 92% com sinal Pix.' },
+      { id: '2', name: 'Barbearia Dom Lucas', niche: 'Barbearia & Barber Shop', phone: '11981112233', value: 249, stage: 'fechado', payment: 'pago', plan: 'basico', notes: '3 barbeiros sincronizados com Google Calendar.' },
+      { id: '3', name: 'Studio Pilates Equilíbrio', niche: 'Pilates & Fisioterapia', phone: '11977778888', value: 399, stage: 'proposta', payment: 'pendente', plan: 'pro', notes: 'Aguardando aprovação de plano semestral.' },
+      { id: '4', name: 'Clínica Odonto Prime', niche: 'Odontologia & Implantes', phone: '11955554444', value: 699, stage: 'fechado', payment: 'pago', plan: 'enterprise', notes: '4 consultórios com triagem automática.' },
+      { id: '5', name: 'Salão Bella Donna Hair', niche: 'Salão de Beleza & Noivas', phone: '11944443333', value: 349, stage: 'atendimento', payment: 'pendente', plan: 'pro', notes: 'Deseja cobrar sinal para dia da noiva.' },
+      { id: '6', name: 'Consultório PsicoVida', niche: 'Psicologia & Terapia', phone: '11933332222', value: 299, stage: 'fechado', payment: 'pago', plan: 'basico', notes: 'Lembretes discretos 2h antes.' },
+      { id: '7', name: 'CrossFit Iron Box', niche: 'Academia & Box Funcional', phone: '11922221111', value: 499, stage: 'proposta', payment: 'pendente', plan: 'pro', notes: 'Controle de vagas limitadas por horário.' },
+      { id: '8', name: 'Spa Urbano Renascer', niche: 'Spa & Massoterapia', phone: '11911119999', value: 599, stage: 'fechado', payment: 'atrasado', plan: 'enterprise', notes: 'Cobrança enviada com link de Pix.' },
+      { id: '9', name: 'Dermatologia Dra. Camila', niche: 'Dermatologia & Laser', phone: '11966667777', value: 499, stage: 'novo', payment: 'pendente', plan: 'pro', notes: 'Lead recebido da apresentação interativa.' },
+      { id: '10', name: 'Estúdio Lash & Brows', niche: 'Extensão de Cílios', phone: '11944448888', value: 249, stage: 'atendimento', payment: 'pendente', plan: 'basico', notes: 'Em demonstração do fluxo de agendamento.' },
+      { id: '11', name: 'Veterinária Pet Care 24h', niche: 'Clínica Veterinária', phone: '11933334444', value: 399, stage: 'novo', payment: 'pendente', plan: 'pro', notes: 'Interesse em vacinas e consultas.' }
+    ];
+
+    let currentView = 'deck';
+    let currentSlide = 0;
+    const TOTAL_SLIDES = 6;
+    let isCrmUnlocked = false;
+    let storedPin = localStorage.getItem(STORAGE_KEY_PIN);
+    let currentPin = (storedPin === "1234" || !storedPin) ? DEFAULT_PIN : storedPin;
+    let leads = [];
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_LEADS);
+      leads = saved ? JSON.parse(saved) : INITIAL_LEADS;
+    } catch {
+      leads = INITIAL_LEADS;
+    }
+
+    function saveLeads() {
+      localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
+      renderCrmBoard();
+      updateCrmBadge();
+    }
+
+    // --- CONTROLE DE TOASTS ---
+    function showToast(text, isError = false) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto flex items-center justify-between gap-3 p-3 rounded-xl shadow-xl border backdrop-blur-xl transition-all ${
+        isError ? 'bg-rose-950/90 border-rose-500/40 text-rose-100' : 'bg-[#1e1136]/95 border-purple-400/40 text-slate-100 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+      }`;
+      toast.innerHTML = `
+        <div class="flex items-center gap-2 text-xs font-semibold">
+          <i class="${isError ? 'fa-solid fa-circle-exclamation text-rose-400' : 'fa-solid fa-circle-check text-emerald-400'}"></i>
+          <span>${text}</span>
+        </div>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- NAVEGAÇÃO ENTRE AS DUAS GRANDES ÁREAS ---
+    function switchView(targetView) {
+      currentView = targetView;
+      const deckSection = document.getElementById('viewDeck');
+      const crmSection = document.getElementById('viewCrm');
+      const tabDeckBtn = document.getElementById('tabDeckBtn');
+      const tabCrmBtn = document.getElementById('tabCrmBtn');
+      const slideBadge = document.getElementById('slideBadge');
+      const btnHeaderCta = document.getElementById('btnHeaderCta');
+      const btnLockCrmHeader = document.getElementById('btnLockCrmHeader');
+
+      if (targetView === 'deck') {
+        deckSection.classList.remove('hidden');
+        deckSection.classList.add('flex');
+        crmSection.classList.add('hidden');
+        crmSection.classList.remove('flex');
+
+        tabDeckBtn.className = "flex items-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-[0_2px_14px_rgba(168,85,247,0.4)] cursor-pointer";
+        tabCrmBtn.className = "flex items-center gap-2 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 cursor-pointer";
+
+        if (slideBadge) slideBadge.style.display = 'inline-flex';
+        if (btnHeaderCta) btnHeaderCta.classList.remove('hidden');
+        if (btnLockCrmHeader) btnLockCrmHeader.classList.add('hidden');
+      } else {
+        deckSection.classList.add('hidden');
+        deckSection.classList.remove('flex');
+        crmSection.classList.remove('hidden');
+        crmSection.classList.add('flex');
+
+        tabCrmBtn.className = "flex items-center gap-2 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-[0_2px_14px_rgba(168,85,247,0.4)] cursor-pointer";
+        tabDeckBtn.className = "flex items-center gap-1.5 px-3.5 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300 cursor-pointer";
+
+        if (slideBadge) slideBadge.style.display = 'none';
+        if (btnHeaderCta) btnHeaderCta.classList.add('hidden');
+        if (btnLockCrmHeader) {
+          btnLockCrmHeader.classList.remove('hidden');
+          btnLockCrmHeader.classList.add('flex');
+        }
+
+        renderCrmBoard();
+      }
+    }
+
+    function requestCrmAccess() {
+      if (isCrmUnlocked) {
+        switchView('crm');
+      } else {
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinErrorMsg').classList.add('hidden');
+        document.getElementById('pinModal').classList.remove('hidden');
+        setTimeout(() => document.getElementById('pinInput').focus(), 150);
+      }
+    }
+
+    function closePinModal() {
+      document.getElementById('pinModal').classList.add('hidden');
+    }
+
+    function handlePinSubmit(e) {
+      e.preventDefault();
+      const val = document.getElementById('pinInput').value.trim();
+      if (val === currentPin) {
+        isCrmUnlocked = true;
+        closePinModal();
+        document.getElementById('crmLockIcon').className = "fa-solid fa-lock-open text-xs text-emerald-400";
+        switchView('crm');
+        showToast('Painel ADM desbloqueado com sucesso!');
+      } else {
+        document.getElementById('pinErrorMsg').classList.remove('hidden');
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinInput').focus();
+      }
+    }
+
+    function lockCrm() {
+      isCrmUnlocked = false;
+      document.getElementById('crmLockIcon').className = "fa-solid fa-lock text-xs text-slate-400";
+      switchView('deck');
+      showToast('Painel bloqueado por segurança.');
+    }
+
+    // --- APRESENTAÇÃO COMERCIAL (SLIDES) ---
+    function initDots() {
+      const container = document.getElementById('deckDots');
+      container.innerHTML = '';
+      for (let i = 0; i < TOTAL_SLIDES; i++) {
+        const dot = document.createElement('button');
+        dot.className = `h-2 rounded-full transition-all duration-300 cursor-pointer ${
+          i === currentSlide ? 'w-7 bg-gradient-to-r from-purple-500 to-fuchsia-400 shadow-[0_0_10px_rgba(168,85,247,0.7)]' : 'w-2 bg-white/20 hover:bg-white/40'
+        }`;
+        dot.onclick = () => goToSlide(i);
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        container.appendChild(dot);
+      }
+    }
+
+    function goToSlide(index) {
+      document.querySelectorAll('.slide-item').forEach(el => el.classList.add('hidden'));
+      currentSlide = Math.max(0, Math.min(index, TOTAL_SLIDES - 1));
+      
+      const targetSlide = document.getElementById(`slide-${currentSlide}`);
+      if (targetSlide) {
+        targetSlide.classList.remove('hidden');
+      }
+
+      const slideBadge = document.getElementById('slideBadge');
+      if (slideBadge) {
+        slideBadge.textContent = `Slide 0${currentSlide + 1} / 0${TOTAL_SLIDES}`;
+      }
+      document.getElementById('deckProgressBar').style.width = `${((currentSlide + 1) / TOTAL_SLIDES) * 100}%`;
+
+      document.getElementById('btnPrevSlide').disabled = currentSlide === 0;
+      document.getElementById('btnPrevSlide').className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+        currentSlide === 0 ? 'opacity-30 border-white/5 text-slate-500 cursor-not-allowed' : 'bg-white/5 hover:bg-white/10 border-white/10 text-white cursor-pointer'
+      }`;
+
+      document.getElementById('btnNextSlide').disabled = currentSlide === TOTAL_SLIDES - 1;
+      document.getElementById('btnNextSlide').className = `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+        currentSlide === TOTAL_SLIDES - 1 ? 'opacity-30 border-white/5 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white border-purple-500 cursor-pointer shadow-md'
+      }`;
+
+      initDots();
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES - 1) goToSlide(currentSlide + 1);
+    }
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    // Suporte ao teclado nos slides
+    window.addEventListener('keydown', (e) => {
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') return;
+      if (currentView === 'deck') {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        }
+      }
+    });
+
+    // Calculadora Interativa de Perda (Slide 2)
+    function updateLossCalculator() {
+      const input = document.getElementById('calcApptsInput');
+      if (!input) return;
+      const appts = parseInt(input.value);
+      const ticket = parseFloat(document.getElementById('calcTicketInput')?.value || 90);
+      const noShow = parseInt(document.getElementById('calcNoShowInput')?.value || 20);
+
+      const apptsVal = document.getElementById('calcApptsVal');
+      if (apptsVal) apptsVal.textContent = appts;
+      const ticketVal = document.getElementById('calcTicketVal');
+      if (ticketVal) ticketVal.textContent = `R$ ${ticket}`;
+      const noShowVal = document.getElementById('calcNoShowVal');
+      if (noShowVal) noShowVal.textContent = `${noShow}%`;
+
+      const monthlyAppts = appts * 24;
+      const missedMonthly = Math.round(monthlyAppts * (noShow / 100));
+      const monthlyLoss = missedMonthly * ticket;
+      const annualLoss = monthlyLoss * 12;
+      const recovered = monthlyLoss * 0.85;
+
+      const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
+      const mLoss = document.getElementById('calcMonthlyLoss');
+      if (mLoss) mLoss.textContent = fmt(monthlyLoss);
+      const aLoss = document.getElementById('calcAnnualLoss');
+      if (aLoss) aLoss.textContent = `~${fmt(annualLoss)} / ano perdidos`;
+      const rec = document.getElementById('calcRecoveredRevenue');
+      if (rec) rec.textContent = `+${fmt(recovered)}`;
+    }
+
+    // --- PAINEL ADM / CRM KANBAN & KPIS ---
+    function formatMoney(val) {
+      return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+    }
+
+    function updateCrmBadge() {
+      document.getElementById('crmHeaderBadge').textContent = leads.length;
+    }
+
+    function renderCrmBoard() {
+      const searchTerm = (document.getElementById('crmSearchInput')?.value || '').toLowerCase().trim();
+      const paymentFilter = document.getElementById('crmPaymentFilter')?.value || 'todos';
+
+      const stages = ['novo', 'atendimento', 'proposta', 'fechado'];
+      stages.forEach(s => {
+        document.getElementById(`cards-${s}`).innerHTML = '';
+      });
+
+      let mrr = 0;
+      let closedCount = 0;
+      let pipelineVal = 0;
+      let paidCount = 0;
+
+      // Filtragem
+      const filtered = leads.filter(l => {
+        const matchesSearch = !searchTerm || l.name.toLowerCase().includes(searchTerm) || l.niche.toLowerCase().includes(searchTerm) || (l.phone && l.phone.includes(searchTerm));
+        const matchesPayment = paymentFilter === 'todos' || l.payment === paymentFilter;
+        return matchesSearch && matchesPayment;
+      });
+
+      // Cálculos e montagem de cards
+      const subtotals = { novo: 0, atendimento: 0, proposta: 0, fechado: 0 };
+      const counts = { novo: 0, atendimento: 0, proposta: 0, fechado: 0 };
+
+      filtered.forEach(lead => {
+        subtotals[lead.stage] += (lead.value || 0);
+        counts[lead.stage]++;
+
+        if (lead.stage === 'fechado') {
+          mrr += lead.value;
+          closedCount++;
+          if (lead.payment === 'pago') paidCount++;
+        } else {
+          pipelineVal += lead.value;
+        }
+
+        const card = createLeadCard(lead);
+        const colContainer = document.getElementById(`cards-${lead.stage}`);
+        if (colContainer) colContainer.appendChild(card);
+      });
+
+      // Atualiza KPIs
+      document.getElementById('kpiMrr').textContent = formatMoney(mrr);
+      document.getElementById('kpiClosedSubtitle').textContent = `${closedCount} clientes ativos`;
+      document.getElementById('kpiTotalLeads').textContent = leads.length;
+      document.getElementById('kpiPipelineVal').textContent = `Pipeline: ${formatMoney(pipelineVal)}`;
+
+      const conversion = leads.length > 0 ? Math.round((closedCount / leads.length) * 100) : 0;
+      document.getElementById('kpiConversion').textContent = `${conversion}%`;
+      document.getElementById('kpiConversionSubtitle').textContent = `${closedCount} de ${leads.length} convertidos`;
+
+      const paidRate = closedCount > 0 ? Math.round((paidCount / closedCount) * 100) : 0;
+      document.getElementById('kpiPaidRate').textContent = `${paidRate}%`;
+      const unpaids = closedCount - paidCount;
+      document.getElementById('kpiPaidSubtitle').textContent = unpaids > 0 ? `${unpaids} pendente/atrasado` : '100% adimplente';
+
+      // Atualiza subtotais das colunas
+      stages.forEach(s => {
+        document.getElementById(`badge-${s}`).textContent = counts[s];
+        document.getElementById(`subtotal-${s}`).textContent = formatMoney(subtotals[s]);
+        if (counts[s] === 0) {
+          document.getElementById(`cards-${s}`).innerHTML = `
+            <div class="h-28 flex flex-col items-center justify-center text-center p-3 border border-dashed border-white/10 rounded-xl text-xs text-slate-500">
+              <span>Nenhum lead</span>
+              <button onclick="openLeadModal('${s}')" class="mt-1 text-[11px] text-purple-400 hover:text-purple-300 font-semibold underline cursor-pointer">+ Adicionar</button>
+            </div>
+          `;
+        }
+      });
+
+      updateCrmBadge();
+    }
+
+    function createLeadCard(lead) {
+      const card = document.createElement('div');
+      card.className = "kanban-card bg-gradient-to-br from-[#241344]/90 to-[#160b2d]/95 hover:from-[#2e1957] hover:to-[#1c0e3a] border border-purple-500/25 hover:border-purple-400/60 rounded-xl p-3 shadow-sm hover:shadow-[0_4px_20px_rgba(168,85,247,0.2)] transition-all cursor-grab active:cursor-grabbing select-none relative";
+      card.draggable = true;
+      card.id = `card-${lead.id}`;
+
+      card.ondragstart = (e) => {
+        e.dataTransfer.setData('text/plain', lead.id);
+        card.classList.add('dragging');
+      };
+      card.ondragend = () => card.classList.remove('dragging');
+
+      const paymentBadges = {
+        pago: '<span onclick="togglePayment(\'' + lead.id + '\', event)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-emerald-500/15 border-emerald-500/30 text-emerald-400 cursor-pointer" title="Clique para alternar">Pago</span>',
+        pendente: '<span onclick="togglePayment(\'' + lead.id + '\', event)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-amber-500/15 border-amber-500/30 text-amber-400 cursor-pointer" title="Clique para alternar">Pendente</span>',
+        atrasado: '<span onclick="togglePayment(\'' + lead.id + '\', event)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-rose-500/15 border-rose-500/30 text-rose-400 cursor-pointer" title="Clique para alternar">Atrasado</span>',
+      };
+
+      const stagesOrder = ['novo', 'atendimento', 'proposta', 'fechado'];
+      const currIdx = stagesOrder.indexOf(lead.stage);
+      const prev = currIdx > 0 ? stagesOrder[currIdx - 1] : null;
+      const next = currIdx < stagesOrder.length - 1 ? stagesOrder[currIdx + 1] : null;
+
+      const initials = lead.name.slice(0, 2).toUpperCase();
+
+      card.innerHTML = `
+        <div onclick="viewLeadDetail('${lead.id}')" class="cursor-pointer">
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shrink-0">${initials}</div>
+              <div class="truncate">
+                <h4 class="font-semibold text-xs text-white truncate leading-tight">${lead.name}</h4>
+                <span class="text-[10px] text-slate-400 block truncate">${lead.niche}</span>
+              </div>
+            </div>
+            <span class="text-[9px] font-bold uppercase tracking-wider bg-purple-950/70 border border-purple-500/30 text-purple-300 px-1.5 py-0.5 rounded shrink-0">${lead.plan || 'PRO'}</span>
+          </div>
+
+          <div class="flex items-center justify-between pt-1.5 border-t border-white/5 mt-1 text-xs">
+            <div class="font-heading font-bold text-white text-xs">${formatMoney(lead.value)}<span class="text-[9px] font-normal text-slate-400 ml-1">/mês</span></div>
+            ${paymentBadges[lead.payment] || paymentBadges.pendente}
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 mt-2 border-t border-white/5 text-[11px]">
+          <a href="https://wa.me/55${(lead.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent('Olá ' + lead.name + ', tudo bem? Aqui é da equipe Agenda Fácil. Como estão seus agendamentos?')}" target="_blank" onclick="event.stopPropagation()" class="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 py-0.5 px-1.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-[10px] font-semibold" title="Abrir WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>Zap</span>
+          </a>
+
+          <div class="flex items-center gap-1">
+            ${prev ? `<button onclick="moveLeadStage('${lead.id}', '${prev}', event)" class="p-1 rounded bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer" title="Voltar etapa"><i class="fa-solid fa-arrow-left text-[10px]"></i></button>` : ''}
+            ${next ? `<button onclick="moveLeadStage('${lead.id}', '${next}', event)" class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 text-[10px] font-semibold cursor-pointer" title="Avançar etapa"><span>Avançar</span><i class="fa-solid fa-arrow-right text-[9px]"></i></button>` : ''}
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // Drag and drop handlers
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+    function handleDrop(e, stage) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const leadId = e.dataTransfer.getData('text/plain');
+      if (leadId) {
+        moveLeadStage(leadId, stage);
+      }
+    }
+
+    function moveLeadStage(leadId, targetStage, event) {
+      if (event) event.stopPropagation();
+      const lead = leads.find(l => l.id === leadId);
+      if (lead && lead.stage !== targetStage) {
+        lead.stage = targetStage;
+        saveLeads();
+        showToast(`Cliente movido para "${targetStage.toUpperCase()}"!`);
+      }
+    }
+
+    function togglePayment(leadId, event) {
+      if (event) event.stopPropagation();
+      const lead = leads.find(l => l.id === leadId);
+      if (lead) {
+        const next = { pago: 'pendente', pendente: 'atrasado', atrasado: 'pago' };
+        lead.payment = next[lead.payment] || 'pago';
+        saveLeads();
+        showToast(`Status alterado para ${lead.payment.toUpperCase()}!`);
+      }
+    }
+
+    // Modal de Lead
+    function openLeadModal(defaultStage = 'novo', leadData = null) {
+      document.getElementById('leadEditId').value = leadData ? leadData.id : '';
+      document.getElementById('leadName').value = leadData ? leadData.name : '';
+      document.getElementById('leadNiche').value = leadData ? leadData.niche : '';
+      document.getElementById('leadPhone').value = leadData ? leadData.phone : '';
+      document.getElementById('leadValue').value = leadData ? leadData.value : 349.00;
+      document.getElementById('leadPlan').value = leadData ? leadData.plan : 'pro';
+      document.getElementById('leadStage').value = leadData ? leadData.stage : defaultStage;
+      document.getElementById('leadPayment').value = leadData ? leadData.payment : 'pendente';
+      document.getElementById('leadNotes').value = leadData ? leadData.notes : '';
+      document.getElementById('leadModalTitle').textContent = leadData ? 'Editar Cliente' : 'Cadastrar Novo Cliente';
+      document.getElementById('leadModal').classList.remove('hidden');
+    }
+
+    function closeLeadModal() {
+      document.getElementById('leadModal').classList.add('hidden');
+    }
+
+    function handleSaveLead(e) {
+      e.preventDefault();
+      const editId = document.getElementById('leadEditId').value;
+      const name = document.getElementById('leadName').value.trim();
+      const niche = document.getElementById('leadNiche').value.trim();
+      const phone = document.getElementById('leadPhone').value.trim();
+      const value = parseFloat(document.getElementById('leadValue').value) || 0;
+      const plan = document.getElementById('leadPlan').value;
+      const stage = document.getElementById('leadStage').value;
+      const payment = document.getElementById('leadPayment').value;
+      const notes = document.getElementById('leadNotes').value.trim();
+
+      if (editId) {
+        const lead = leads.find(l => l.id === editId);
+        if (lead) {
+          Object.assign(lead, { name, niche, phone, value, plan, stage, payment, notes });
+          showToast('Cliente atualizado com sucesso!');
+        }
+      } else {
+        const newLead = {
+          id: 'lead_' + Date.now(),
+          name, niche, phone, value, plan, stage, payment, notes
+        };
+        leads.unshift(newLead);
+        showToast(`Cliente "${name}" cadastrado!`);
+      }
+
+      closeLeadModal();
+      saveLeads();
+    }
+
+    // Detalhes do Lead
+    let activeDetailLeadId = null;
+    function viewLeadDetail(leadId) {
+      const lead = leads.find(l => l.id === leadId);
+      if (!lead) return;
+      activeDetailLeadId = leadId;
+
+      document.getElementById('detailAvatar').textContent = lead.name.slice(0, 2).toUpperCase();
+      document.getElementById('detailName').textContent = lead.name;
+      document.getElementById('detailNichePlan').textContent = `${lead.niche} • Plano ${(lead.plan || 'PRO').toUpperCase()}`;
+      document.getElementById('detailPhone').textContent = lead.phone || 'Não informado';
+      document.getElementById('detailValue').textContent = `${formatMoney(lead.value)} / mês`;
+      document.getElementById('detailNotesBox').textContent = lead.notes || 'Sem observações adicionais.';
+
+      const cleanPhone = (lead.phone || '').replace(/\D/g, '');
+      let defaultMsg = '';
+      if (lead.demoDate) {
+        defaultMsg = `Olá ${lead.name}, tudo bem? Aqui é da equipe Agenda Fácil. Confirmamos sua Demonstração Ao Vivo marcada para ${lead.demoDate} às ${lead.demoTime || '10:30'}. Estamos prontos para apresentar o sistema!`;
+      } else if (lead.plan === 'vitalicio') {
+        defaultMsg = `Olá ${lead.name}, tudo bem? Aqui é da equipe Agenda Fácil. Confirmamos sua contratação do Acesso Vitalício (R$ 99 único). Vamos iniciar a implantação da sua conta!`;
+      } else {
+        defaultMsg = `Olá ${lead.name}, tudo bem? Aqui é da equipe Agenda Fácil. Estamos acompanhando os resultados da sua automação de agendamentos!`;
+      }
+      document.getElementById('detailWhatsAppLink').href = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(defaultMsg)}`;
+
+      document.getElementById('leadDetailModal').classList.remove('hidden');
+    }
+
+    function closeLeadDetailModal() {
+      document.getElementById('leadDetailModal').classList.add('hidden');
+      activeDetailLeadId = null;
+    }
+
+    function editCurrentLead() {
+      const lead = leads.find(l => l.id === activeDetailLeadId);
+      if (lead) {
+        closeLeadDetailModal();
+        openLeadModal(lead.stage, lead);
+      }
+    }
+
+    function deleteCurrentLead() {
+      if (!activeDetailLeadId) return;
+      if (confirm('Deseja realmente excluir este cliente do CRM?')) {
+        leads = leads.filter(l => l.id !== activeDetailLeadId);
+        closeLeadDetailModal();
+        saveLeads();
+        showToast('Cliente removido do CRM.');
+      }
+    }
+
+    function exportCrmCsv() {
+      const headers = ['ID', 'Nome', 'Segmento', 'Telefone', 'Mensalidade', 'Etapa', 'Pagamento', 'Plano', 'Notas'];
+      const rows = leads.map(l => [
+        l.id, `"${l.name.replace(/"/g, '""')}"`, `"${l.niche.replace(/"/g, '""')}"`, `"${l.phone || ''}"`,
+        l.value, l.stage, l.payment, l.plan, `"${(l.notes || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encoded = encodeURI(csv);
+      const a = document.createElement('a');
+      a.setAttribute('href', encoded);
+      a.setAttribute('download', `agendafacil_crm_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Planilha CSV gerada com sucesso!');
+    }
+
+    function resetDefaultData() {
+      if (confirm('Deseja restaurar os 11 clientes de demonstração originais?')) {
+        leads = JSON.parse(JSON.stringify(INITIAL_LEADS));
+        saveLeads();
+        showToast('Dados restaurados para o padrão original!');
+      }
+    }
+
+    // --- SIMULADOR INTERATIVO DO WHATSAPP ---
+    let simData = {
+      service: 'Consulta Estética VIP',
+      price: 180,
+      deposit: 50,
+      time: '09:30'
+    };
+
+    function openBookingSimulatorModal() {
+      document.getElementById('bookingSimulatorModal').classList.remove('hidden');
+      goToSimStep(1);
+    }
+    function closeBookingSimulatorModal() {
+      document.getElementById('bookingSimulatorModal').classList.add('hidden');
+    }
+
+    function goToSimStep(stepNum) {
+      [1, 2, 3, 4].forEach(n => document.getElementById(`simStep-${n}`).classList.add('hidden'));
+      document.getElementById(`simStep-${stepNum}`).classList.remove('hidden');
+    }
+
+    function selectSimService(name, price, deposit) {
+      simData.service = name;
+      simData.price = price;
+      simData.deposit = deposit;
+      document.getElementById('simSummaryService').textContent = name;
+      document.getElementById('simDepositVal').textContent = `R$ ${deposit},00`;
+    }
+
+    function selectSimTime(time, btn) {
+      simData.time = time;
+      document.getElementById('simSummaryTime').textContent = time;
+      document.querySelectorAll('.sim-time-slot').forEach(b => {
+        b.className = "sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-slate-300";
+      });
+      btn.className = "sim-time-slot py-2 px-3 rounded-lg text-xs font-bold border border-purple-400 bg-purple-600 text-white";
+    }
+
+    function copySimPix() {
+      navigator.clipboard.writeText('00020126580014br.gov.bcb.pix0136agendafacil-sinal-demo');
+      showToast('Código Pix copiado!');
+    }
+
+    function finishSimBooking() {
+      const name = document.getElementById('simClientName').value || 'Ana Paula';
+      const phone = document.getElementById('simClientPhone').value || '11987654321';
+
+      document.getElementById('simMsgClient').textContent = name;
+      document.getElementById('simMsgService').textContent = simData.service;
+      document.getElementById('simMsgTime').textContent = simData.time;
+
+      // Adiciona o lead automaticamente no CRM na coluna Novo Lead
+      leads.unshift({
+        id: 'sim_' + Date.now(),
+        name: name,
+        niche: 'Demonstração Interativa',
+        phone: phone,
+        value: 349,
+        stage: 'novo',
+        payment: 'pago',
+        plan: 'pro',
+        notes: `Simulou agendamento de ${simData.service} para ${simData.time} com sinal Pix de R$ ${simData.deposit}.`
+      });
+      saveLeads();
+
+      goToSimStep(4);
+      showToast(`Agendamento de ${name} gravado no CRM!`);
+    }
+
+    // --- MODAL DE DEMONSTRAÇÃO VIP / CONTRATAÇÃO ---
+    let selectedDemoPlan = { plan: 'vitalicio', price: 99, mode: 'contratar' };
+
+    function openDemoModal(preSelectedPlan = 'vitalicio', mode = 'contratar') {
+      document.getElementById('demoModal').classList.remove('hidden');
+      selectedDemoPlan = { plan: 'vitalicio', price: 99, mode };
+      
+      const titleEl = document.getElementById('demoModalTitle');
+      const subEl = document.getElementById('demoModalSubtitle');
+      const planBox = document.getElementById('demoPlanBox');
+      const dateTimeBox = document.getElementById('demoDateTimeBox');
+      const iconEl = document.getElementById('demoModalIcon');
+      const demoDateInput = document.getElementById('demoDate');
+
+      // Preenche data padrão para amanhã caso vazia
+      if (demoDateInput && !demoDateInput.value) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        demoDateInput.value = tomorrow.toISOString().split('T')[0];
+      }
+
+      if (mode === 'demonstracao') {
+        if (titleEl) titleEl.textContent = "Agendar Demonstração Ao Vivo";
+        if (subEl) subEl.textContent = "Escolha a data e o horário ideal para ver a plataforma com um especialista";
+        if (planBox) planBox.classList.add('hidden');
+        if (dateTimeBox) dateTimeBox.classList.remove('hidden');
+        if (demoDateInput) demoDateInput.required = true;
+        if (iconEl) iconEl.className = "fa-solid fa-headset text-xs";
+      } else {
+        if (titleEl) titleEl.textContent = "Contratar o Agenda Fácil";
+        if (subEl) subEl.textContent = "Acesso Vitalício por R$ 99 único • Implantação imediata";
+        if (planBox) planBox.classList.remove('hidden');
+        if (dateTimeBox) dateTimeBox.classList.add('hidden');
+        if (demoDateInput) demoDateInput.required = false;
+        if (iconEl) iconEl.className = "fa-solid fa-bolt text-xs";
+      }
+    }
+
+    function closeDemoModal() {
+      document.getElementById('demoModal').classList.add('hidden');
+    }
+
+    function handleDemoSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('demoName').value.trim();
+      const niche = document.getElementById('demoNiche').value.trim();
+      const phone = document.getElementById('demoPhone').value.trim();
+      const isDemo = selectedDemoPlan.mode === 'demonstracao';
+
+      let demoDateVal = '';
+      let demoTimeVal = '';
+      let whatsappMsg = '';
+
+      if (isDemo) {
+        const rawDate = document.getElementById('demoDate').value;
+        demoTimeVal = document.getElementById('demoTime').value || '10:30';
+        if (rawDate) {
+          const parts = rawDate.split('-');
+          demoDateVal = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : rawDate;
+        } else {
+          demoDateVal = 'Data a combinar';
+        }
+        whatsappMsg = `Olá ${name}! Confirmamos sua solicitação de *Demonstração Ao Vivo* do *Agenda Fácil* para o dia *${demoDateVal}* às *${demoTimeVal}* (${niche}). Em instantes entraremos em contato pelo WhatsApp para a apresentação!`;
+      } else {
+        whatsappMsg = `Olá ${name}! Confirmamos seu pedido de contratação do *Agenda Fácil Vitalício* por *R$ 99 único* (sem mensalidades) para o negócio *${niche}*. Nossa equipe entrará em contato para ativação imediata do seu acesso!`;
+      }
+
+      leads.unshift({
+        id: 'lead_' + Date.now(),
+        name, niche, phone,
+        value: isDemo ? 0 : selectedDemoPlan.price,
+        stage: isDemo ? 'atendimento' : 'fechado',
+        payment: isDemo ? 'pendente' : 'pago',
+        plan: selectedDemoPlan.plan,
+        demoDate: demoDateVal,
+        demoTime: demoTimeVal,
+        mode: selectedDemoPlan.mode,
+        notes: isDemo 
+          ? `Demonstração Ao Vivo agendada para ${demoDateVal} às ${demoTimeVal}. Nicho: ${niche}.`
+          : `Contratação do Agenda Fácil Vitalício por R$ 99 único. Nicho: ${niche}.`
+      });
+
+      saveLeads();
+      closeDemoModal();
+
+      // Disparo automático para o WhatsApp
+      const cleanPhone = phone.replace(/\D/g, '');
+      const waUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+      const link = document.createElement('a');
+      link.href = waUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast(isDemo ? `Demonstração agendada para ${demoDateVal} às ${demoTimeVal}! Mensagem gerada no WhatsApp.` : `Contratação registrada! Mensagem de confirmação gerada no WhatsApp.`);
+    }
+
+    // Inicialização
+    initDots();
+    goToSlide(0);
+    renderCrmBoard();
+  </script>
+</body>
+</html>
