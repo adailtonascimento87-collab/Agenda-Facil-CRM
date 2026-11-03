@@ -210,23 +210,19 @@
   </header>
 
   <!-- =========================================================================
-       ÁREA 1: APRESENTAÇÃO COMERCIAL (6 SLIDES COM CTA - FORMATO QUADRADO)
+       ÁREA 1: APRESENTAÇÃO COMERCIAL (6 SLIDES COM CTA - LARGURA TOTAL E RESPONSIVO)
        ========================================================================= -->
-  <section id="viewDeck" class="relative z-10 w-full min-h-[calc(100vh-68px)] pt-[68px] pb-[60px] flex items-center justify-center p-3 sm:p-6 lg:p-8">
-    <div class="w-full max-w-4xl mx-auto flex flex-col items-center">
-      <!-- Container com Aspecto Quadrado / Formato Apresentação -->
-      <main class="w-full aspect-square max-w-[620px] max-h-[620px] glass-panel rounded-3xl p-5 sm:p-7 shadow-[0_0_50px_rgba(22,185,213,0.18)] flex flex-col justify-between relative overflow-hidden transition-all duration-500">
-        
-        <!-- Barra de Progresso no Topo do Card -->
-        <div class="absolute top-0 left-0 w-full h-1 bg-white/5">
-          <div id="deckProgressBar" class="h-full bg-gradient-to-r from-[#1769AA] to-[#16B9D5] transition-all duration-300 w-1/6"></div>
-        </div>
+  <section id="viewDeck" class="relative z-10 w-full min-h-[calc(100vh-68px)] pt-[68px] pb-[76px] flex flex-col justify-center items-center">
+    <!-- Barra de Progresso no Topo (Fixada abaixo do cabeçalho) -->
+    <div class="fixed top-[68px] left-0 w-full h-1 bg-white/5 z-30">
+      <div id="deckProgressBar" class="h-full bg-gradient-to-r from-[#1769AA] to-[#16B9D5] transition-all duration-300 w-1/6"></div>
+    </div>
 
-        <!-- SLIDES INTERNOS -->
-        <div class="flex-1 flex flex-col justify-center overflow-y-auto pr-1">
+    <!-- Container dos Slides em Largura Total / Fluido e Responsivo sem Caixas Restritivas -->
+    <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1 flex flex-col justify-center">
 
-          <!-- SLIDE 1: CAPA DE ALTO IMPACTO -->
-          <article id="slide-0" class="slide-item space-y-5 text-center py-2">
+      <!-- SLIDE 1: CAPA DE ALTO IMPACTO -->
+      <article id="slide-0" class="slide-item space-y-5 text-center py-2 max-w-4xl mx-auto w-full">
             <div>
               <span class="inline-flex items-center gap-2 bg-[#1769AA]/20 border border-[#16B9D5]/35 text-[#16B9D5] px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
                 <i class="fa-solid fa-sparkles text-xs"></i> ASD Digital Apresenta
@@ -592,7 +588,7 @@
             </div>
 
             <!-- OFERTA ESPECIAL VITALÍCIA CENTRALIZADA E LIMPA -->
-            <div class="bg-gradient-to-r from-[#102A43] via-[#0d2238] to-[#081625] border-2 border-[#16B9D5] rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(22,185,213,0.3)] relative overflow-hidden text-center max-w-xl mx-auto">
+            <div class="bg-gradient-to-r from-[#102A43] via-[#0d2238] to-[#081625] border-2 border-[#16B9D5] rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(22,185,213,0.3)] relative overflow-hidden text-center max-w-2xl mx-auto">
               <div class="absolute top-0 right-0 bg-gradient-to-r from-[#1769AA] to-[#16B9D5] text-slate-950 font-black text-[11px] uppercase px-4 py-1.5 rounded-bl-2xl shadow-md">
                 ⭐ OFERTA ESPECIAL • VITALÍCIO
               </div>
@@ -680,10 +676,7 @@
               </span>
             </div>
           </article>
-
-        </div>
-      </main>
-    </div>
+    </main>
 
     <!-- FOOTER DE NAVEGAÇÃO DOS SLIDES -->
     <footer class="fixed bottom-0 left-0 w-full h-[60px] px-4 sm:px-8 flex items-center justify-between z-30 bg-[#081625]/90 backdrop-blur-xl border-t border-[#16B9D5]/20">
@@ -1323,6 +1316,7 @@
       if (targetSlide) {
         targetSlide.classList.remove('hidden');
       }
+      window.scrollTo(0, 0);
 
       const slideBadge = document.getElementById('slideBadge');
       if (slideBadge) {
